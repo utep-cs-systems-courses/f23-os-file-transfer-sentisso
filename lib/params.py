@@ -1,5 +1,5 @@
 from sys import argv
-import sys, re
+import sys
 
 progName = "()"
 if len(argv):
@@ -8,21 +8,24 @@ if len(argv):
 
 switchesVarDefaults = ()
 
+
 def parseParams(_switchesVarDefaults):
     global switchesVarDefaults
     paramMap = {}
     switchesVarDefaults = _switchesVarDefaults
-    swVarDefaultMap = {}       # map from cmd switch to param var name
+    swVarDefaultMap = {}  # map from cmd switch to param var name
     for switches, param, default in switchesVarDefaults:
         for sw in switches:
             swVarDefaultMap[sw] = (param, default)
-        paramMap[param] = default # set default values
+        paramMap[param] = default  # set default values
     try:
         while len(argv):
-            sw = argv[0]; del argv[0]
+            sw = argv[0]
+            del argv[0]
             paramVar, defaultVal = swVarDefaultMap[sw]
-            if (defaultVal):
-                val = argv[0]; del argv[0]
+            if defaultVal:
+                val = argv[0]
+                del argv[0]
                 paramMap[paramVar] = val
             else:
                 paramMap[paramVar] = True
@@ -30,7 +33,8 @@ def parseParams(_switchesVarDefaults):
         print("Problem parsing parameters (exception=%s)" % e)
         usage()
     return paramMap
-        
+
+
 def usage():
     print("%s usage:" % progName)
     for switches, param, default in switchesVarDefaults:
@@ -40,4 +44,3 @@ def usage():
             else:
                 print(" [%s]   (%s if present)" % (sw, param))
     sys.exit(1)
-

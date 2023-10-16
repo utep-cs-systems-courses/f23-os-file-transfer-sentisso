@@ -2,20 +2,20 @@
 
 # Echo client program
 import socket, sys, re, time
-sys.path.append("../lib")       # for params
+
+sys.path.append("../lib")  # for params
 import params
 
 switchesVarDefaults = (
     (('-s', '--server'), 'server', "127.0.0.1:50001"),
     (('-d', '--delay'), 'delay', "0"),
-    (('-?', '--usage'), "usage", False), # boolean (set if present)
-    )
-
+    (('-?', '--usage'), "usage", False),  # boolean (set if present)
+)
 
 progname = "framedClient"
 paramMap = params.parseParams(switchesVarDefaults)
 
-server, usage  = paramMap["server"], paramMap["usage"]
+server, usage = paramMap["server"], paramMap["usage"]
 
 if usage:
     params.usage()
@@ -51,7 +51,7 @@ if s is None:
     print('could not open socket')
     sys.exit(1)
 
-delay = float(paramMap['delay']) # delay before reading (default = 0s)
+delay = float(paramMap['delay'])  # delay before reading (default = 0s)
 if delay != 0:
     print(f"sleeping for {delay}s")
     time.sleep(int(delay))

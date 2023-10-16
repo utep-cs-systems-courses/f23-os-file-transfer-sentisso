@@ -2,19 +2,19 @@
 
 # Echo client program
 import socket, sys, re, os
-sys.path.append("../lib")       # for params
+
+sys.path.append("../lib")  # for params
 import params
 
 switchesVarDefaults = (
     (('-s', '--server'), 'server', "127.0.0.1:50001"),
-    (('-?', '--usage'), "usage", False), # boolean (set if present)
-    )
-
+    (('-?', '--usage'), "usage", False),  # boolean (set if present)
+)
 
 progname = "framedClient"
 paramMap = params.parseParams(switchesVarDefaults)
 
-server, usage  = paramMap["server"], paramMap["usage"]
+server, usage = paramMap["server"], paramMap["usage"]
 
 if usage:
     params.usage()
@@ -65,7 +65,7 @@ while len(outMessage):
     bytesSent = s.send(outMessage)
     outMessage = outMessage[bytesSent:]
 
-s.shutdown(socket.SHUT_WR)      # no more output
+s.shutdown(socket.SHUT_WR)  # no more output
 
 while 1:
     data = s.recv(1024).decode()
