@@ -4,8 +4,8 @@
 
 import socket, sys, re, os, time
 
-sys.path.append("../lib")  # for params
-import params
+sys.path.append("..")  # for params
+import lib.params as params
 
 switchesVarDefaults = (
     (('-l', '--listenPort'), 'listenPort', 50001),

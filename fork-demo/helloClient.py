@@ -3,8 +3,8 @@
 # Echo client program
 import socket, sys, re, time
 
-sys.path.append("../lib")  # for params
-import params
+sys.path.append("..")  # for params
+import lib.params as params
 
 switchesVarDefaults = (
     (('-s', '--server'), 'server', "127.0.0.1:50001"),

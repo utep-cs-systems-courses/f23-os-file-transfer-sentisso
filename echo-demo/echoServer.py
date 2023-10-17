@@ -2,10 +2,10 @@
 
 # Echo server program
 
-import socket, sys, re
+import socket, sys, re, select
 
-sys.path.append("../lib")  # for params
-import params
+sys.path.append("..")  # for params
+import lib.params as params
 
 switchesVarDefaults = (
     (('-l', '--listenPort'), 'listenPort', 50001),
