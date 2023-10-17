@@ -1,11 +1,14 @@
-import socket, select, os, sys
+import socket, select
 from typing import List
 
-READ_BUFFER_LEN = 1024
 
+class SocketServer:
+    """
+    A wrapper class around a socket server. Handles read/write events and new connections.
+    """
 
-class Server:
-    def __init__(self, port, max_conns):
+    def __init__(self, port, max_conns, read_buffer_len=1024):
+        self.__read_buffer_len = read_buffer_len
         self.__max_conns = max_conns
         self.__port = port
 
@@ -14,9 +17,6 @@ class Server:
 
         self.__readfds: List[socket.socket] = [self.__socket]
         self.__is_listening = False
-
-        # dictionary [port] = state of the transfer - can be None, 'sending', or 'receiving'
-        self.__transfers = {}
 
         self.__events = {
             'connect': None,
@@ -30,7 +30,8 @@ class Server:
         :return:
         """
         if self.__is_listening:
-            raise Exception("Server is already listening")
+            print('[server] warning: already listening!')
+            return
 
         self.__socket.listen(self.__max_conns)
         self.__is_listening = True
@@ -38,7 +39,7 @@ class Server:
         print('[server] listening on port %d...' % self.__port)
 
         if self.__events['data'] is None:
-            raise Exception("No data callback set!")
+            print('[server] warning: no data event handler set!')
 
         while True:
             rlist, wlist, xlist = select.select(
@@ -49,6 +50,7 @@ class Server:
     def send(self, fd: socket.socket, data: bytes):
         """
         Send data to a client.
+        The function will make sure that all data is sent.
         :param fd: The client socket to send data to.
         :param data: The data to send.
         :return:
@@ -57,8 +59,32 @@ class Server:
             bytes_sent = fd.send(data)
             data = data[bytes_sent:]
 
+        return self
+
+    def disconnect(self, fd: socket.socket):
+        """
+        Disconnect a client.
+        :param fd: The client socket to disconnect.
+        :return:
+        """
+        self.__readfds.remove(fd)
+        fd.close()
+
+        return self
+
     def on(self, event, callback):
+        """
+        Set an event callback. Available events are:
+        - connect - called when a new client connects ((addr, port))
+        - disconnect - called when a client disconnects ((addr, port))
+        - data - called when a client sends data (fd, data), receives at most `read_buffer_len` bytes
+        :param event:
+        :param callback:
+        :return:
+        """
         self.__events[event] = callback
+
+        return self
 
     def __handle_select(self, rlist, wlist, xlist):
         """
@@ -96,7 +122,7 @@ class Server:
         """
         addr, port = fd.getpeername()
 
-        data = fd.recv(READ_BUFFER_LEN)
+        data = fd.recv(self.__read_buffer_len)
 
         if len(data) == 0:
             print("[%d] Zero length read, terminating..." % (port))
@@ -110,10 +136,3 @@ class Server:
 
         if self.__events['data']:
             self.__events['data'](fd, data)
-
-        # sendMsg = ("Echoing %s" % data).encode()
-        # print("[%d] -> '%s'" % (port, data))
-        # print("[%d] <- '%s'" % (port, sendMsg.decode()))
-        # while len(sendMsg):
-        #     bytesSent = fd.send(sendMsg)
-        #     sendMsg = sendMsg[bytesSent:]
