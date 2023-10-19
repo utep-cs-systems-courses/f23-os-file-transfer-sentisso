@@ -13,6 +13,7 @@ class SocketServer:
         self.__port = port
 
         self.__socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.__socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.__socket.bind(('', self.__port))
 
         self.__readfds: List[socket.socket] = [self.__socket]
@@ -49,17 +50,12 @@ class SocketServer:
 
     def send(self, fd: socket.socket, data: bytes):
         """
-        Send data to a client.
-        The function will make sure that all data is sent.
+        Send all the given data to a client.
         :param fd: The client socket to send data to.
         :param data: The data to send.
         :return:
         """
-        while len(data):
-            bytes_sent = fd.send(data)
-            data = data[bytes_sent:]
-
-        return self
+        return fd.sendall(data)
 
     def disconnect(self, fd: socket.socket):
         """
@@ -70,7 +66,13 @@ class SocketServer:
         self.__readfds.remove(fd)
         fd.close()
 
-        return self
+    def close(self):
+        """
+        Close the server socket.
+        :return:
+        """
+        self.__socket.shutdown(socket.SHUT_RDWR)
+        self.__socket.close()
 
     def on(self, event, callback):
         """
@@ -109,8 +111,6 @@ class SocketServer:
         conn, addr = self.__socket.accept()
         self.__readfds.append(conn)
 
-        print("[%d] Connected!" % (addr[1]))
-
         if self.__events['connect']:
             self.__events['connect'](addr)
 
@@ -125,13 +125,10 @@ class SocketServer:
         data = fd.recv(self.__read_buffer_len)
 
         if len(data) == 0:
-            print("[%d] Zero length read, terminating..." % (port))
             self.__readfds.remove(fd)
             fd.close()
-
             if self.__events['disconnect']:
                 self.__events['disconnect']((addr, port))
-
             return
 
         if self.__events['data']:
