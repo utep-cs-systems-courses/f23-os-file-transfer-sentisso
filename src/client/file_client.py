@@ -12,9 +12,9 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class Client:
-    def __init__(self, addr: str, data_folder: str, byteorder="little"):
+    def __init__(self, addr: str, byteorder="little"):
         self.__byteorder = byteorder
-        self.__data_folder = os.path.abspath(os.path.join(ROOT_DIR, data_folder))
+        # self.__data_folder = os.path.abspath(os.path.join(ROOT_DIR, data_folder))
         self.__addr = addr
         self.__socket = None
 
@@ -56,9 +56,6 @@ class Client:
 
     def download_file(self, fname: str):
         print('[client] requesting to download "%s"...' % fname)
-        if not self.__validate_file(fname):
-            print('ERROR: file "%s" does not exist' % fname)
-            self.exit(1)
 
         self.__send("D".encode())
         self.__write_fname(fname)
@@ -248,7 +245,8 @@ class Client:
         """
         Get the absolute path to the given fname in the data folder.
         """
-        return os.path.abspath(os.path.join(self.__data_folder, fname))
+        # return os.path.abspath(os.path.join(self.__data_folder, fname))
+        return fname
 
     def __validate_file(self, fname: str):
         """

@@ -50,7 +50,7 @@ if len(server_host) == 0 or len(fname) == 0 or not 0 < server_port < 65536:
     incorrect_usage()
 
 # run the client
-client = file_client.Client(server, "../../data/client")
+client = file_client.Client(server)
 if not client.connect():
     print('[client] could not connect to %s. Exiting...' % server)
 
